@@ -1,27 +1,25 @@
 import { useState } from 'react';
 import { Car } from '@/types/car';
+import { AddNewCar } from '@/components/add-new-car';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { 
   LogOut, 
   Car as CarIcon, 
   Calendar,
-  Edit,
-  Trash2,
   Plus,
-  Settings
+  Settings,
+  ArrowLeft,
+  Trash2
 } from 'lucide-react';
 
 interface AdminPanelProps {
   cars: Car[];
   comingSoonCars: Car[];
   onUpdateCar: (car: Car) => void;
+  onAddCar: (car: Car) => void;
   onRemoveCar: (carId: string) => void;
   onAddToComingSoon: (car: Car) => void;
   onRemoveFromComingSoon: (carId: string) => void;
@@ -32,12 +30,13 @@ export const AdminPanel = ({
   cars,
   comingSoonCars,
   onUpdateCar,
+  onAddCar,
   onRemoveCar,
   onAddToComingSoon,
   onRemoveFromComingSoon,
   onLogout
 }: AdminPanelProps) => {
-  const [editingCar, setEditingCar] = useState<Car | null>(null);
+  const [showAddCar, setShowAddCar] = useState(false);
   const { toast } = useToast();
 
   const handleMarkOnRent = (car: Car, availableDate: string) => {
@@ -81,15 +80,30 @@ export const AdminPanel = ({
   const getStatusBadge = (car: Car) => {
     switch (car.availabilityStatus) {
       case 'available':
-        return <Badge className="bg-green-500">Available</Badge>;
+        return <Badge className="bg-green-500 text-white">Available</Badge>;
       case 'on-rent':
-        return <Badge className="bg-orange-500">On Rent</Badge>;
+        return <Badge className="bg-orange-500 text-white">On Rent</Badge>;
       case 'most-liked':
-        return <Badge className="bg-amber-500">Most Liked</Badge>;
+        return <Badge className="bg-amber-500 text-white">Most Liked</Badge>;
       default:
         return <Badge variant="secondary">Unknown</Badge>;
     }
   };
+
+  const handleAddNewCar = (newCar: Car) => {
+    onAddCar(newCar);
+    setShowAddCar(false);
+  };
+
+  // Show Add New Car form
+  if (showAddCar) {
+    return (
+      <AddNewCar
+        onAddCar={handleAddNewCar}
+        onCancel={() => setShowAddCar(false)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -112,6 +126,28 @@ export const AdminPanel = ({
       </div>
 
       <div className="container p-4 space-y-6">
+        {/* Quick Actions */}
+        <Card className="premium-card">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Plus className="w-5 h-5" />
+                Quick Actions
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => setShowAddCar(true)}
+              className="w-full btn-automotive"
+              size="lg"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Car to Fleet
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Car Management */}
         <Card className="premium-card">
           <CardHeader>

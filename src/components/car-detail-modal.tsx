@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Car } from '@/types/car';
 import { CONTACT_INFO } from '@/data/cars';
 import {
@@ -15,7 +16,9 @@ import {
   Crown, 
   Users, 
   Car as CarIcon,
-  MapPin 
+  MapPin,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 interface CarDetailModalProps {
@@ -25,6 +28,8 @@ interface CarDetailModalProps {
 }
 
 export const CarDetailModal = ({ car, isOpen, onClose }: CarDetailModalProps) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
   if (!car) return null;
 
   const handleCallNow = () => {
@@ -56,6 +61,18 @@ export const CarDetailModal = ({ car, isOpen, onClose }: CarDetailModalProps) =>
     return null;
   };
 
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev === car.images.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? car.images.length - 1 : prev - 1
+    );
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
@@ -64,16 +81,66 @@ export const CarDetailModal = ({ car, isOpen, onClose }: CarDetailModalProps) =>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Car Images */}
-          <div className="space-y-2">
-            {car.images.map((image, index) => (
+          {/* Car Images Gallery */}
+          <div className="space-y-3">
+            {/* Main Image */}
+            <div className="relative">
               <img
-                key={index}
-                src={image}
-                alt={`${car.name} - Image ${index + 1}`}
+                src={car.images[currentImageIndex]}
+                alt={`${car.name} - Image ${currentImageIndex + 1}`}
                 className="w-full h-48 object-cover rounded-lg"
               />
-            ))}
+              
+              {/* Navigation Arrows */}
+              {car.images.length > 1 && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 p-0 bg-white/80 hover:bg-white"
+                    onClick={prevImage}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 p-0 bg-white/80 hover:bg-white"
+                    onClick={nextImage}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </>
+              )}
+              
+              {/* Image Counter */}
+              <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                {currentImageIndex + 1} / {car.images.length}
+              </div>
+            </div>
+            
+            {/* Thumbnail Gallery */}
+            {car.images.length > 1 && (
+              <div className="grid grid-cols-4 gap-2">
+                {car.images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`aspect-square rounded border-2 overflow-hidden ${
+                      index === currentImageIndex 
+                        ? 'border-primary' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${car.name} thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Status Badge */}

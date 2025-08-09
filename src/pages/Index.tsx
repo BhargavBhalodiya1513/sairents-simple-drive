@@ -23,6 +23,10 @@ const Index = () => {
     );
   };
 
+  const handleAddCar = (newCar: Car) => {
+    setCars(prevCars => [...prevCars, newCar]);
+  };
+
   const handleRemoveCar = (carId: string) => {
     setCars(prevCars => prevCars.filter(car => car.id !== carId));
   };
@@ -60,6 +64,7 @@ const Index = () => {
         cars={cars}
         comingSoonCars={comingSoonCars}
         onUpdateCar={handleUpdateCar}
+        onAddCar={handleAddCar}
         onRemoveCar={handleRemoveCar}
         onAddToComingSoon={handleAddToComingSoon}
         onRemoveFromComingSoon={handleRemoveFromComingSoon}
@@ -83,10 +88,10 @@ const Index = () => {
               variant="outline"
               size="sm"
               onClick={() => setShowAdminLogin(true)}
-              className="text-white border-white hover:bg-white hover:text-primary"
+              className="text-white border-white hover:bg-white hover:text-primary font-medium px-4 py-2"
             >
               <Settings className="w-4 h-4 mr-2" />
-              Admin
+              Admin Panel
             </Button>
           </div>
         </div>
