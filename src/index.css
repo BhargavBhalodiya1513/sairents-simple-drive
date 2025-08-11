@@ -119,11 +119,26 @@
   * {
     @apply border-border;
   }
+  
+  html, body {
+    height: 100vh;
+    overflow-x: hidden;
+    /* Support for safe areas on mobile */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "cv11", "ss01";
     font-variation-settings: "opsz" 32;
+    /* Prevent overscroll on mobile */
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  #root {
+    min-height: 100vh;
+    height: 100%;
   }
 
   /* Mobile-first responsive breakpoints */
