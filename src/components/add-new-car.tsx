@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Car } from '@/types/car';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Upload, X, Car as CarIcon } from 'lucide-react';
+import { Plus, Upload, X, Car as CarIcon, Image as ImageIcon } from 'lucide-react';
 
 interface AddNewCarProps {
   onAddCar: (car: Car) => void;
@@ -25,6 +25,8 @@ export const AddNewCar = ({ onAddCar, onCancel }: AddNewCarProps) => {
     seatingCapacity: ''
   });
   const [imageFiles, setImageFiles] = useState<string[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleInputChange = (field: string, value: string | number) => {
@@ -35,7 +37,7 @@ export const AddNewCar = ({ onAddCar, onCancel }: AddNewCarProps) => {
   };
 
   const handleAddImage = () => {
-    const imageUrl = prompt('Enter image URL (or upload feature will be added):');
+    const imageUrl = prompt('Enter image URL:');
     if (imageUrl && imageFiles.length < 10) {
       setImageFiles(prev => [...prev, imageUrl]);
       toast({
@@ -51,7 +53,62 @@ export const AddNewCar = ({ onAddCar, onCancel }: AddNewCarProps) => {
     }
   };
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const fileArray = Array.from(files);
+      const validFiles = fileArray.filter(file => file.type.startsWith('image/'));
+      
+      if (validFiles.length !== fileArray.length) {
+        toast({
+          title: "Invalid Files",
+          description: "Only image files are allowed",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (imageFiles.length + validFiles.length > 10) {
+        toast({
+          title: "Too Many Images",
+          description: "Maximum 10 images allowed per car",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Convert files to URLs for preview
+      const newImageUrls: string[] = [];
+      validFiles.forEach(file => {
+        const url = URL.createObjectURL(file);
+        newImageUrls.push(url);
+      });
+
+      setUploadedFiles(prev => [...prev, ...validFiles]);
+      setImageFiles(prev => [...prev, ...newImageUrls]);
+      
+      toast({
+        title: "Images Uploaded",
+        description: `Added ${validFiles.length} image(s)`,
+      });
+    }
+  };
+
   const handleRemoveImage = (index: number) => {
+    const imageToRemove = imageFiles[index];
+    
+    // If it's an uploaded file (blob URL), revoke it and remove from uploadedFiles
+    if (imageToRemove.startsWith('blob:')) {
+      URL.revokeObjectURL(imageToRemove);
+      const fileIndex = uploadedFiles.findIndex((_, i) => {
+        const currentBlobIndex = imageFiles.slice(0, index + 1).filter(img => img.startsWith('blob:')).length - 1;
+        return i === currentBlobIndex;
+      });
+      if (fileIndex !== -1) {
+        setUploadedFiles(prev => prev.filter((_, i) => i !== fileIndex));
+      }
+    }
+    
     setImageFiles(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -207,17 +264,38 @@ export const AddNewCar = ({ onAddCar, onCancel }: AddNewCarProps) => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label>Car Images (Minimum 7 required)</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAddImage}
-                  disabled={imageFiles.length >= 10}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Image URL
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={imageFiles.length >= 10}
+                  >
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    Upload Files
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddImage}
+                    disabled={imageFiles.length >= 10}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add URL
+                  </Button>
+                </div>
               </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileUpload}
+                className="hidden"
+              />
 
               {imageFiles.length === 0 ? (
                 <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">

@@ -1,10 +1,14 @@
 import { useState } from 'react';
+import { format } from 'date-fns';
 import { Car } from '@/types/car';
 import { AddNewCar } from '@/components/add-new-car';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 import { 
   LogOut, 
   Car as CarIcon, 
@@ -37,18 +41,23 @@ export const AdminPanel = ({
   onLogout
 }: AdminPanelProps) => {
   const [showAddCar, setShowAddCar] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [showDatePicker, setShowDatePicker] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleMarkOnRent = (car: Car, availableDate: string) => {
+  const handleMarkOnRent = (car: Car, date: Date) => {
+    const formattedDate = format(date, 'dd/MM/yyyy');
     const updatedCar: Car = {
       ...car,
       availabilityStatus: 'on-rent',
-      availableDate
+      availableDate: formattedDate
     };
     onUpdateCar(updatedCar);
+    setShowDatePicker(null);
+    setSelectedDate(undefined);
     toast({
       title: "Car Status Updated",
-      description: `${car.name} marked as on rent until ${availableDate}`,
+      description: `${car.name} marked as on rent until ${formattedDate}`,
     });
   };
 
@@ -171,17 +180,31 @@ export const AdminPanel = ({
                   >
                     Most Liked
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      const date = prompt('Enter available date (dd/mm/yyyy):');
-                      if (date) handleMarkOnRent(car, date);
-                    }}
-                  >
-                    <Calendar className="w-4 h-4 mr-1" />
-                    On Rent
-                  </Button>
+                  <Popover open={showDatePicker === car.id} onOpenChange={(open) => setShowDatePicker(open ? car.id : null)}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                      >
+                        <Calendar className="w-4 h-4 mr-1" />
+                        On Rent
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => {
+                          if (date) {
+                            handleMarkOnRent(car, date);
+                          }
+                        }}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <Button
                     size="sm"
                     variant="outline"
