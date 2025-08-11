@@ -88,10 +88,10 @@ const Index = () => {
               variant="outline"
               size="sm"
               onClick={() => setShowAdminLogin(true)}
-              className="text-white border-white hover:bg-white hover:text-primary font-medium px-4 py-2"
+              className="bg-white/20 text-white border-white/50 hover:bg-white hover:text-primary font-medium px-4 py-2 backdrop-blur-sm"
             >
               <Settings className="w-4 h-4 mr-2" />
-              Admin Panel
+              Admin
             </Button>
           </div>
         </div>

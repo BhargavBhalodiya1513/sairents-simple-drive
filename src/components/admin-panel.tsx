@@ -106,18 +106,15 @@ export const AdminPanel = ({
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-destructive to-red-600 text-white p-4">
+    <div className="min-h-screen bg-gray-50">
+      {/* Simple Header */}
+      <div className="bg-white shadow-sm border-b p-4">
         <div className="container flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Settings className="w-6 h-6" />
-            <h1 className="text-xl font-bold">Sai Motors Admin</h1>
-          </div>
+          <h1 className="text-xl font-semibold text-gray-800">Admin Panel</h1>
           <Button 
             onClick={onLogout}
             variant="outline"
-            className="text-white border-white hover:bg-white hover:text-destructive"
+            size="sm"
           >
             <LogOut className="w-4 h-4 mr-2" />
             Logout
@@ -126,43 +123,31 @@ export const AdminPanel = ({
       </div>
 
       <div className="container p-4 space-y-6">
-        {/* Quick Actions */}
-        <Card className="premium-card">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Plus className="w-5 h-5" />
-                Quick Actions
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={() => setShowAddCar(true)}
-              className="w-full btn-automotive"
-              size="lg"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add New Car to Fleet
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Add New Car */}
+        <div className="bg-white rounded-lg shadow-sm border p-4">
+          <h2 className="text-lg font-medium mb-3">Add New Car</h2>
+          <Button 
+            onClick={() => setShowAddCar(true)}
+            className="w-full"
+            size="lg"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add New Car
+          </Button>
+        </div>
 
         {/* Car Management */}
-        <Card className="premium-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CarIcon className="w-5 h-5" />
-              Manage Cars
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="p-4 border-b">
+            <h2 className="text-lg font-medium">Manage Cars</h2>
+          </div>
+          <div className="p-4 space-y-4">
             {cars.map((car) => (
               <div key={car.id} className="border rounded-lg p-4 space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-semibold">{car.name}</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="font-medium">{car.name}</h3>
+                    <p className="text-sm text-gray-600">
                       {car.year} {car.model} • ₹{car.pricePerKm}/km
                     </p>
                   </div>
@@ -176,7 +161,7 @@ export const AdminPanel = ({
                     onClick={() => handleMarkAvailable(car)}
                     disabled={car.availabilityStatus === 'available'}
                   >
-                    Mark Available
+                    Available
                   </Button>
                   <Button
                     size="sm"
@@ -184,7 +169,7 @@ export const AdminPanel = ({
                     onClick={() => handleMarkMostLiked(car)}
                     disabled={car.availabilityStatus === 'most-liked'}
                   >
-                    Mark Most Liked
+                    Most Liked
                   </Button>
                   <Button
                     size="sm"
@@ -195,7 +180,7 @@ export const AdminPanel = ({
                     }}
                   >
                     <Calendar className="w-4 h-4 mr-1" />
-                    Mark On Rent
+                    On Rent
                   </Button>
                   <Button
                     size="sm"
@@ -210,33 +195,46 @@ export const AdminPanel = ({
                     }}
                   >
                     <Plus className="w-4 h-4 mr-1" />
-                    Add to Coming Soon
+                    Coming Soon
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => {
+                      if (confirm(`Are you sure you want to remove ${car.name}?`)) {
+                        onRemoveCar(car.id);
+                        toast({
+                          title: "Car Removed",
+                          description: `${car.name} has been removed from the fleet`,
+                        });
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Remove
                   </Button>
                 </div>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Coming Soon Management */}
-        <Card className="premium-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plus className="w-5 h-5" />
-              Coming Soon Cars
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="p-4 border-b">
+            <h2 className="text-lg font-medium">Coming Soon Cars</h2>
+          </div>
+          <div className="p-4 space-y-4">
             {comingSoonCars.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">
+              <p className="text-gray-500 text-center py-4">
                 No cars in coming soon section
               </p>
             ) : (
               comingSoonCars.map((car) => (
                 <div key={car.id} className="border rounded-lg p-4 flex justify-between items-center">
                   <div>
-                    <h3 className="font-semibold">{car.name}</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="font-medium">{car.name}</h3>
+                    <p className="text-sm text-gray-600">
                       {car.year} {car.model} • ₹{car.pricePerKm}/km
                     </p>
                   </div>
@@ -257,8 +255,8 @@ export const AdminPanel = ({
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
